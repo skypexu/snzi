@@ -158,10 +158,16 @@ void leaf_arrive(struct snzi_node *node) {
 		}
 
 		if (c == -1) {
-			node_arrive(node->x.leaf.parent);
-			if (cmpxchg(&node->x.leaf.var, x, leaf_encode(1, v)) !=
-			    x)
-				undoArr++;
+                        if (undoArr == 2) {
+			        if (cmpxchg(&node->x.leaf.var, x,
+                                         leaf_encode(1, v)) == x)
+                                        undoArr--;
+                        } else {
+			        node_arrive(node->x.leaf.parent);
+			        if (cmpxchg(&node->x.leaf.var, x,
+                                        leaf_encode(1, v)) != x)
+				        undoArr++;
+                        }
 		}
 	}
 
